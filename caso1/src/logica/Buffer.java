@@ -5,6 +5,7 @@ import java.util.ArrayList;
 public class Buffer {
 
 	private ArrayList<Mensaje> mensajes;
+	private ArrayList<Mensaje> respuestas;
 	private int tamanio;
 	private Object lleno;
 	private Object vacio;
@@ -16,17 +17,22 @@ public class Buffer {
 		vacio = new Object();
 	}
 	
-	public void encolar(Mensaje m) {
-		synchronized (lleno) {
-			while (mensajes.size() == tamanio) {
-				try {
-					lleno.wait();
-				} catch (InterruptedException e) {}
+	public boolean encolar(Mensaje m) {
+		synchronized (mensajes) {
+			if(mensajes.size() == tamanio) {
+					return false;
 			}
 		}
 		
 		synchronized(this){mensajes.add(m);}
 		synchronized(vacio) {vacio.notify();}
+		try {
+			m.wait();
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return true;
 	}
 	
 	public Mensaje desencolar() {
@@ -42,5 +48,27 @@ public class Buffer {
 		synchronized(this){temp = mensajes.remove(0);}
 		synchronized(lleno) {lleno.notify();}
 		return temp;
+	}
+	
+	public void encolarRespuesta(Mensaje m) {
+		synchronized(respuestas) {
+			if(respuestas.size() == tamanio) {
+				try {
+					lleno.wait();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			synchronized(this){respuestas.add(m);}
+			synchronized(m) {m.notify();}{
+			}
+		}
+	}
+	
+	public Mensaje desencolarRespuesta() {
+		synchronized(respuestas){
+			return respuestas.remove(0);
+		}
 	}
 }
