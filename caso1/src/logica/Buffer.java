@@ -26,12 +26,12 @@ public class Buffer {
 		
 		synchronized(this){mensajes.add(m);}
 		synchronized(vacio) {vacio.notify();}
-		try {
-			m.wait();
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		synchronized(m) {
+			try {
+				m.wait();
+			} catch (InterruptedException e) {}
 		}
+		
 		return true;
 	}
 	
@@ -70,5 +70,9 @@ public class Buffer {
 		synchronized(respuestas){
 			return respuestas.remove(0);
 		}
+	}
+
+	public boolean hayMensajes() {
+		return mensajes.size() != 0;
 	}
 }
