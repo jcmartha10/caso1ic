@@ -17,7 +17,7 @@ public class Servidor extends Thread{
 		while (buffer.hayMensajes()) {
 			Mensaje m = buffer.desencolar();
 			m.setRespuesta(m.getConsulta() + 1);
-			buffer.encolar(m);
+			buffer.encolarRespuesta(m);
 		}
 	}
 	
